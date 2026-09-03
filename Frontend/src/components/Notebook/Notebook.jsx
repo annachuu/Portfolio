@@ -32,9 +32,40 @@ export default function Notebook({ pages }) {
 
   const closed = view !== "open";
 
+  const setPageCue = useCallback((side, active) => {
+    const notebook = stageRef.current?.querySelector(".notebook");
+    if (!notebook) 
+      return;
+    notebook.classList.toggle(side === "left" ? "cue-prev" : "cue-next", active);
+  }, []);
+
   const onPointerMove = useCallback(
     (event) => {
-      if (!closed || reducedMotion || !stageRef.current) return;
+      if (!stageRef.current) 
+        return;
+
+      if (!closed) 
+      {
+        const hit = event.target.closest?.(".page-hit");
+        const notebook = stageRef.current.querySelector(".notebook");
+
+        if (!notebook) 
+          return;
+
+        notebook.classList.toggle(
+          "cue-prev",
+          Boolean(hit?.classList.contains("page-hit-left"))
+        );
+        notebook.classList.toggle(
+          "cue-next",
+          Boolean(hit?.classList.contains("page-hit-right"))
+        );
+        return;
+      }
+
+      if (reducedMotion) 
+        return;
+      
       const rect = stageRef.current.getBoundingClientRect();
       const px = (event.clientX - rect.left) / rect.width - 0.5;
       const py = (event.clientY - rect.top) / rect.height - 0.5;
@@ -61,6 +92,7 @@ export default function Notebook({ pages }) {
     stageRef.current.style.setProperty("--shadow-y", "22px");
     stageRef.current.style.setProperty("--shadow-alpha", "0.42");
     stageRef.current.style.setProperty("--ribbon-shift", "0px");
+    stageRef.current.querySelector(".notebook")?.classList.remove("cue-prev", "cue-next");
   }, []);
 
   useEffect(() => {
@@ -105,7 +137,7 @@ export default function Notebook({ pages }) {
   }, [goTo, maxPosition, startTurn, view]);
 
   const leftBind = bindLeaf("back");
-  const rightBind = bindLeaf("forward", { bothDirections: compact });
+  const rightBind = bindLeaf("forward");
 
   const liveLabel =
     view === "front"
@@ -146,6 +178,30 @@ export default function Notebook({ pages }) {
             canGoForward={view === "open" && canGoForward}
           />
         </div>
+        {view === "open" ? (
+          <div
+            className="page-hit page-hit-left"
+            aria-hidden="true"
+            onPointerEnter={() => setPageCue("left", true)}
+            onPointerLeave={() => setPageCue("left", false)}
+            onPointerDown={leftBind.onPointerDown}
+            onPointerMove={leftBind.onPointerMove}
+            onPointerUp={leftBind.onPointerUp}
+            onPointerCancel={leftBind.onPointerUp}
+          />
+        ) : null}
+        {view === "open" ? (
+          <div
+            className="page-hit page-hit-right"
+            aria-hidden="true"
+            onPointerEnter={() => setPageCue("right", true)}
+            onPointerLeave={() => setPageCue("right", false)}
+            onPointerDown={rightBind.onPointerDown}
+            onPointerMove={rightBind.onPointerMove}
+            onPointerUp={rightBind.onPointerUp}
+            onPointerCancel={rightBind.onPointerUp}
+          />
+        ) : null}
         <Cover
           variant="front"
           active={view === "front"}

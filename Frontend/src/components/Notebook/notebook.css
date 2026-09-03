@@ -97,6 +97,7 @@
     inset 0 1px 0 rgba(247, 243, 234, 0.12),
     inset 0 -8px 16px rgba(0, 0, 0, 0.18);
   transform: translateZ(-2px);
+  pointer-events: none;
 }
 
 .boards::after 
@@ -337,6 +338,7 @@
   z-index: 1;
   height: 100%;
   padding: clamp(22px, 6%, 36px);
+  pointer-events: none;
 }
 
 .placeholder-page 
@@ -369,6 +371,7 @@
   font-family: var(--font-note);
   font-size: 22px;
   color: rgba(37, 37, 31, 0.38);
+  pointer-events: none;
 }
 
 .placeholder-left .placeholder-note 
@@ -444,7 +447,11 @@
 }
 
 .leaf.is-turnable:hover .corner-cue,
-.leaf.is-turnable:focus-visible .corner-cue 
+.leaf.is-turnable:focus-visible .corner-cue,
+.notebook.cue-prev .leaf.is-turnable .corner-cue-prev,
+.notebook.cue-next .leaf.is-turnable .corner-cue-next,
+.notebook:has(.page-hit-left:hover) .leaf.is-turnable .corner-cue-prev,
+.notebook:has(.page-hit-right:hover) .leaf.is-turnable .corner-cue-next
 {
   opacity: 1;
   transform: translate(0, 0);
@@ -538,6 +545,11 @@
 .cover.is-active 
 {
   pointer-events: auto;
+}
+
+.cover:not(.is-active) * 
+{
+  pointer-events: none;
 }
 
 .cover-board-front 
@@ -755,6 +767,30 @@
   left: 78%;
 }
 
+.page-hit 
+{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+  cursor: pointer;
+  touch-action: none;
+  background: transparent;
+  transform: translateZ(18px);
+}
+
+.page-hit-left 
+{
+  left: 0;
+  width: 50%;
+}
+
+.page-hit-right 
+{
+  right: 0;
+  width: 50%;
+}
+
 .tabs 
 {
   position: absolute;
@@ -763,7 +799,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  z-index: 4;
+  z-index: 12;
+  transform: translateZ(40px);
 }
 
 .tab 
